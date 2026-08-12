@@ -78,9 +78,7 @@ class _MainShellState extends State<MainShell> {
   }
 
   void _navigateTo(Widget screen) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => screen),
-    );
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
   }
 
   Widget _badge(int count, Widget child) {
@@ -150,11 +148,25 @@ class _MainShellState extends State<MainShell> {
           if (i == 2 || i == 3) _loadCounts();
         },
         destinations: [
-          const NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Feed'),
-          const NavigationDestination(icon: Icon(Icons.explore_outlined), selectedIcon: Icon(Icons.explore), label: 'Explorar'),
+          const NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'Feed',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.explore_outlined),
+            selectedIcon: Icon(Icons.explore),
+            label: 'Explorar',
+          ),
           NavigationDestination(
-            icon: _badge(_unreadNotifs, const Icon(Icons.notifications_outlined)),
-            selectedIcon: _badge(_unreadNotifs, const Icon(Icons.notifications)),
+            icon: _badge(
+              _unreadNotifs,
+              const Icon(Icons.notifications_outlined),
+            ),
+            selectedIcon: _badge(
+              _unreadNotifs,
+              const Icon(Icons.notifications),
+            ),
             label: 'Alertas',
           ),
           NavigationDestination(
@@ -162,7 +174,11 @@ class _MainShellState extends State<MainShell> {
             selectedIcon: _badge(_unreadMsgs, const Icon(Icons.chat_bubble)),
             label: 'Chat',
           ),
-          const NavigationDestination(icon: Icon(Icons.settings_outlined), selectedIcon: Icon(Icons.settings), label: 'Definições'),
+          const NavigationDestination(
+            icon: Icon(Icons.settings_outlined),
+            selectedIcon: Icon(Icons.settings),
+            label: 'Definições',
+          ),
         ],
       ),
     );
@@ -231,7 +247,10 @@ class _MainShellState extends State<MainShell> {
               ),
               ListTile(
                 leading: const Icon(Icons.login),
-                title: Text('Iniciar sessão', style: TextStyle(color: AppColors.accentSoft)),
+                title: Text(
+                  'Iniciar sessão',
+                  style: TextStyle(color: AppColors.accentSoft),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   auth.exitGuestMode();
@@ -275,10 +294,16 @@ class _MainShellState extends State<MainShell> {
             }),
             if (auth.isAuthenticated && (auth.profile?.isMod ?? false)) ...[
               const Divider(),
-              _drawerItem(context, Icons.admin_panel_settings_outlined, 'Admin', () {
-                Navigator.pop(context);
-                _navigateTo(const AdminScreen());
-              }, color: AppColors.pink),
+              _drawerItem(
+                context,
+                Icons.admin_panel_settings_outlined,
+                'Admin',
+                () {
+                  Navigator.pop(context);
+                  _navigateTo(const AdminScreen());
+                },
+                color: AppColors.pink,
+              ),
             ],
             const Divider(),
             const Divider(),
