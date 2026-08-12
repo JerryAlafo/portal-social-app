@@ -569,17 +569,17 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
                       children: [
                         Row(
                           children: [
-                            _statCard('Publicações hoje', _dashboard!.postsToday, Icons.post_add),
+                            _statCard('Utilizadores', _dashboard!.totalUsers, Icons.people_outline),
                             const SizedBox(width: 10),
-                            _statCard('Denúncias', _dashboard!.totalReports, Icons.flag),
+                            _statCard('Publicações hoje', _dashboard!.postsToday, Icons.post_add),
                           ],
                         ),
                         const SizedBox(height: 10),
                         Row(
                           children: [
-                            _statCard('Últimas 24h', _dashboard!.reportsLast24h, Icons.schedule),
+                            _statCard('Denúncias', _dashboard!.totalReports, Icons.flag),
                             const SizedBox(width: 10),
-                            _statCard('Anúncios ativos', _dashboard!.activeAnnouncements, Icons.campaign),
+                            _statCard('Últimas 24h', _dashboard!.reportsLast24h, Icons.schedule),
                           ],
                         ),
                         const SizedBox(height: 20),

@@ -61,6 +61,7 @@ class AdminDashboard {
   final List<int> dailyPosts;
   final List<String> dailyLabels;
   final int activeAnnouncements;
+  final int totalUsers;
 
   AdminDashboard({
     required this.reports,
@@ -72,6 +73,7 @@ class AdminDashboard {
     required this.dailyPosts,
     required this.dailyLabels,
     required this.activeAnnouncements,
+    required this.totalUsers,
   });
 
   factory AdminDashboard.fromJson(Map<String, dynamic> json) {
@@ -105,6 +107,7 @@ class AdminDashboard {
       dailyPosts: dailyPosts,
       dailyLabels: dailyLabels,
       activeAnnouncements: (json['activeAnnouncements'] as num?)?.toInt() ?? 0,
+      totalUsers: (json['totalUsers'] as num?)?.toInt() ?? 0,
     );
   }
 }
