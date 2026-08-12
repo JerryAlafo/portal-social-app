@@ -17,7 +17,18 @@ import '../../widgets/states.dart';
 import '../perfil/user_profile_screen.dart';
 import '../post/post_detail_screen.dart';
 
-const kCategories = ['Tudo', 'Shonen', 'Shojo', 'Isekai', 'Seinen', 'Cosplay', 'Manga', 'Figura', 'AMV', 'Outro'];
+const kCategories = [
+  'Tudo',
+  'Shonen',
+  'Shojo',
+  'Isekai',
+  'Seinen',
+  'Cosplay',
+  'Manga',
+  'Figura',
+  'AMV',
+  'Outro',
+];
 
 const _tabs = ['Geral', 'A seguir', 'Sugestoes', 'Anuncios'];
 
@@ -86,7 +97,12 @@ class _FeedScreenState extends State<FeedScreen>
       category = _activeCategory != 'Tudo' ? _activeCategory : null;
     }
 
-    final res = await PostService.instance.getFeed(targetPage, 20, category: category, filter: filter);
+    final res = await PostService.instance.getFeed(
+      targetPage,
+      20,
+      category: category,
+      filter: filter,
+    );
 
     if (!mounted) return;
     setState(() {
@@ -273,8 +289,13 @@ class _FeedScreenState extends State<FeedScreen>
             style: TextButton.styleFrom(
               foregroundColor: active
                   ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
-              textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                  : Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+              textStyle: const TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+              ),
             ),
             onPressed: () {
               if (t == 'A seguir' && !requireLogin(context)) return;
@@ -291,15 +312,19 @@ class _FeedScreenState extends State<FeedScreen>
     if (_activeTab == 'Sugestoes') {
       return _buildSuggestions();
     }
-    if (_initialLoading) return const LoadingView(message: 'A carregar feed...');
+    if (_initialLoading)
+      return const LoadingView(message: 'A carregar feed...');
     if (_error != null && _posts.isEmpty) {
       return ErrorView(message: _error!, onRetry: () => _load(refresh: true));
     }
 
-    final showAnnouncements = _activeTab == 'Anuncios' ||
+    final showAnnouncements =
+        _activeTab == 'Anuncios' ||
         (_activeTab == 'Geral' && _announcements.any((a) => a.pinned));
     final visibleAnnouncements = showAnnouncements
-        ? _announcements.where((a) => _activeTab == 'Geral' ? a.pinned : true).toList()
+        ? _announcements
+              .where((a) => _activeTab == 'Geral' ? a.pinned : true)
+              .toList()
         : <Announcement>[];
 
     if (_posts.isEmpty && visibleAnnouncements.isEmpty) {
@@ -363,7 +388,8 @@ class _FeedScreenState extends State<FeedScreen>
     showModalBottomSheet(
       context: context,
       builder: (ctx) {
-        final isOwn = auth.isAuthenticated &&
+        final isOwn =
+            auth.isAuthenticated &&
             auth.profile != null &&
             auth.profile!.id == post.authorId;
         return SafeArea(
@@ -388,7 +414,10 @@ class _FeedScreenState extends State<FeedScreen>
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.report_outlined, color: Color(0xFFFC5C7D)),
+                leading: const Icon(
+                  Icons.report_outlined,
+                  color: Color(0xFFFC5C7D),
+                ),
                 title: const Text('Denunciar'),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -398,7 +427,10 @@ class _FeedScreenState extends State<FeedScreen>
               ),
               if (isOwn)
                 ListTile(
-                  leading: const Icon(Icons.delete_outline, color: Color(0xFFFC5C7D)),
+                  leading: const Icon(
+                    Icons.delete_outline,
+                    color: Color(0xFFFC5C7D),
+                  ),
                   title: const Text('Apagar publicação'),
                   onTap: () {
                     Navigator.pop(ctx);
@@ -422,19 +454,34 @@ class _FeedScreenState extends State<FeedScreen>
           controller: controller,
           maxLines: 3,
           maxLength: 280,
-          decoration: const InputDecoration(hintText: 'Adiciona um comentário (opcional)'),
+          decoration: const InputDecoration(
+            hintText: 'Adiciona um comentário (opcional)',
+          ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Repostar')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Repostar'),
+          ),
         ],
       ),
     );
     if (ok == true) {
-      final res = await PostService.instance.repostPost(post.id, content: controller.text);
+      final res = await PostService.instance.repostPost(
+        post.id,
+        content: controller.text,
+      );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(res.ok ? 'Publicação repostada!' : (res.error ?? 'Erro.'))),
+        SnackBar(
+          content: Text(
+            res.ok ? 'Publicação repostada!' : (res.error ?? 'Erro.'),
+          ),
+        ),
       );
     }
   }
@@ -451,16 +498,29 @@ class _FeedScreenState extends State<FeedScreen>
           decoration: const InputDecoration(hintText: 'Motivo da denúncia'),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Denunciar')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Denunciar'),
+          ),
         ],
       ),
     );
     if (ok == true && reason.text.trim().isNotEmpty) {
-      final res = await PostService.instance.reportPost(post.id, reason: reason.text.trim());
+      final res = await PostService.instance.reportPost(
+        post.id,
+        reason: reason.text.trim(),
+      );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(res.ok ? 'Denúncia enviada. Obrigado!' : (res.error ?? 'Erro.'))),
+        SnackBar(
+          content: Text(
+            res.ok ? 'Denúncia enviada. Obrigado!' : (res.error ?? 'Erro.'),
+          ),
+        ),
       );
     }
   }
@@ -470,11 +530,18 @@ class _FeedScreenState extends State<FeedScreen>
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Apagar publicação'),
-        content: const Text('Tens a certeza que queres apagar esta publicação?'),
+        content: const Text(
+          'Tens a certeza que queres apagar esta publicação?',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFFC5C7D)),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFFC5C7D),
+            ),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Apagar'),
           ),
@@ -487,9 +554,9 @@ class _FeedScreenState extends State<FeedScreen>
       if (res.ok) {
         setState(() => _posts.removeWhere((p) => p.id == post.id));
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(res.error ?? 'Erro ao apagar.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(res.error ?? 'Erro ao apagar.')));
       }
     }
   }
@@ -543,13 +610,16 @@ class _AnnouncementCard extends StatelessWidget {
             announcement.title,
             style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
           ),
-          if (announcement.content != null && announcement.content!.isNotEmpty) ...[
+          if (announcement.content != null &&
+              announcement.content!.isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(
               announcement.content!,
               style: TextStyle(
                 fontSize: 13.5,
-                color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.75),
+                color: theme.textTheme.bodyMedium?.color?.withValues(
+                  alpha: 0.75,
+                ),
                 height: 1.45,
               ),
             ),
@@ -562,7 +632,9 @@ class _AnnouncementCard extends StatelessWidget {
                   '@${announcement.authorUsername}',
                   style: TextStyle(
                     fontSize: 12,
-                    color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+                    color: theme.textTheme.bodyMedium?.color?.withValues(
+                      alpha: 0.5,
+                    ),
                   ),
                 ),
               if (announcement.authorUsername != null) const SizedBox(width: 8),
@@ -572,7 +644,9 @@ class _AnnouncementCard extends StatelessWidget {
                     : '',
                 style: TextStyle(
                   fontSize: 12,
-                  color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+                  color: theme.textTheme.bodyMedium?.color?.withValues(
+                    alpha: 0.5,
+                  ),
                 ),
               ),
             ],
@@ -586,7 +660,20 @@ class _AnnouncementCard extends StatelessWidget {
     try {
       final date = DateTime.tryParse(dateStr);
       if (date == null) return '';
-      final months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+      final months = [
+        'Jan',
+        'Fev',
+        'Mar',
+        'Abr',
+        'Mai',
+        'Jun',
+        'Jul',
+        'Ago',
+        'Set',
+        'Out',
+        'Nov',
+        'Dez',
+      ];
       return '${date.day} ${months[date.month - 1]} ${date.year}';
     } catch (_) {
       return '';
@@ -606,7 +693,10 @@ class _SuggestionTile extends StatelessWidget {
           url: profile.avatarUrl,
           initials: profile.avatarInitials,
         ),
-        title: Text(profile.displayName, style: const TextStyle(fontWeight: FontWeight.w700)),
+        title: Text(
+          profile.displayName,
+          style: const TextStyle(fontWeight: FontWeight.w700),
+        ),
         subtitle: Text('@${profile.username}'),
         trailing: _FollowButton(profile: profile),
         onTap: () => Navigator.of(context).push(
@@ -639,7 +729,9 @@ class _FollowButtonState extends State<_FollowButton> {
           : () async {
               if (!requireLogin(context)) return;
               setState(() => _loading = true);
-              final res = await FollowService.instance.toggleFollow(widget.profile.id);
+              final res = await FollowService.instance.toggleFollow(
+                widget.profile.id,
+              );
               if (!mounted) return;
               setState(() {
                 _loading = false;
