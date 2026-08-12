@@ -10,6 +10,18 @@ class SupportCreatorScreen extends StatelessWidget {
   static const _instagramJobs = 'https://www.instagram.com/jerry_org_jobs/?hl=fa';
   static const _youtube = 'https://www.youtube.com/channel/UCKmIif3KVJKlHK7NcjhXWlg';
 
+  Future<void> _open(BuildContext context, String url) async {
+    final uri = Uri.parse(url);
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Não foi possível abrir o link.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,51 +85,39 @@ class SupportCreatorScreen extends StatelessWidget {
             label: 'WhatsApp',
             sublabel: _whatsapp,
             color: const Color(0xFF25D366),
-            onTap: () => _open('https://wa.me/258833066530'),
+            onTap: () => _open(context, 'https://wa.me/258833066530'),
           ),
           _SocialTile(
             iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/LinkedIn_logo_initials.png/1200px-LinkedIn_logo_initials.png',
             label: 'LinkedIn',
             sublabel: 'Jerry de Jesus',
             color: const Color(0xFF0A66C2),
-            onTap: () => _open(_linkedin),
+            onTap: () => _open(context, _linkedin),
           ),
           _SocialTile(
             iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/1200px-Instagram_logo_2016.svg.png',
             label: 'Instagram',
             sublabel: '@jerry_org_',
             color: const Color(0xFFE4405F),
-            onTap: () => _open(_instagram),
+            onTap: () => _open(context, _instagram),
           ),
           _SocialTile(
             iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/1200px-Instagram_logo_2016.svg.png',
             label: 'Instagram Jobs',
             sublabel: '@jerry_org_jobs',
             color: const Color(0xFFF77737),
-            onTap: () => _open(_instagramJobs),
+            onTap: () => _open(context, _instagramJobs),
           ),
           _SocialTile(
             iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/YouTube_icon_%282013-2017%29.png/1200px-YouTube_icon_%282013-2017%29.png',
             label: 'YouTube',
             sublabel: 'Portal Social',
             color: const Color(0xFFFF0000),
-            onTap: () => _open(_youtube),
+            onTap: () => _open(context, _youtube),
           ),
         ],
       ),
     );
-  }
-
-  Future<void> _open(String url) async {
-    final uri = Uri.parse(url);
-    try {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Não foi possível abrir o link.')),
-      );
-    }
   }
 }
 
