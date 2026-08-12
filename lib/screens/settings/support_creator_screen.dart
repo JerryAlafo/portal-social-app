@@ -69,35 +69,35 @@ class SupportCreatorScreen extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           _SocialTile(
-            icon: Icons.chat_rounded,
+            iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp/1200px-WhatsApp.png',
             label: 'WhatsApp',
             sublabel: _whatsapp,
             color: const Color(0xFF25D366),
-            onTap: () => _open(_whatsapp.replaceFirst('+', '')),
+            onTap: () => _open('https://wa.me/258833066530'),
           ),
           _SocialTile(
-            icon: Icons.work_rounded,
+            iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/LinkedIn_logo_initials.png/1200px-LinkedIn_logo_initials.png',
             label: 'LinkedIn',
             sublabel: 'Jerry de Jesus',
             color: const Color(0xFF0A66C2),
             onTap: () => _open(_linkedin),
           ),
           _SocialTile(
-            icon: Icons.camera_alt_rounded,
+            iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/1200px-Instagram_logo_2016.svg.png',
             label: 'Instagram',
             sublabel: '@jerry_org_',
             color: const Color(0xFFE4405F),
             onTap: () => _open(_instagram),
           ),
           _SocialTile(
-            icon: Icons.business_center_rounded,
+            iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/1200px-Instagram_logo_2016.svg.png',
             label: 'Instagram Jobs',
             sublabel: '@jerry_org_jobs',
             color: const Color(0xFFF77737),
             onTap: () => _open(_instagramJobs),
           ),
           _SocialTile(
-            icon: Icons.play_circle_filled_rounded,
+            iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/YouTube_icon_%282013-2017%29.png/1200px-YouTube_icon_%282013-2017%29.png',
             label: 'YouTube',
             sublabel: 'Portal Social',
             color: const Color(0xFFFF0000),
@@ -110,21 +110,26 @@ class SupportCreatorScreen extends StatelessWidget {
 
   Future<void> _open(String url) async {
     final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
+    try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Não foi possível abrir o link.')),
+      );
     }
   }
 }
 
 class _SocialTile extends StatelessWidget {
-  final IconData icon;
+  final String iconUrl;
   final String label;
   final String sublabel;
   final Color color;
   final VoidCallback onTap;
 
   const _SocialTile({
-    required this.icon,
+    required this.iconUrl,
     required this.label,
     required this.sublabel,
     required this.color,
@@ -146,12 +151,22 @@ class _SocialTile extends StatelessWidget {
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  width: 40,
+                  height: 40,
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(icon, color: color, size: 22),
+                  child: Image.network(
+                    iconUrl,
+                    width: 24,
+                    height: 24,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(Icons.public, color: color, size: 22);
+                    },
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
