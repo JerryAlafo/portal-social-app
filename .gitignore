@@ -48,3 +48,5 @@ app.*.map.json
 .env
 android/app/google-services.json
 cookies.txt
+android/key.properties
+android/app/upload-keystore.jks
