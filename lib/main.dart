@@ -6,8 +6,10 @@ import 'core/theme.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/main_shell.dart';
 import 'services/auth_service.dart';
+import 'services/update_service.dart';
 import 'state/theme_state.dart';
 import 'widgets/brand_logo.dart';
+import 'widgets/update_banner.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +26,7 @@ class PortalApp extends StatefulWidget {
 
 class _PortalAppState extends State<PortalApp> {
   final AuthService _auth = AuthService();
+  final UpdateService _update = UpdateService();
 
   @override
   void initState() {
@@ -38,6 +41,7 @@ class _PortalAppState extends State<PortalApp> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: _auth),
+        ChangeNotifierProvider.value(value: _update),
         ChangeNotifierProvider(create: (_) => ThemeState()),
       ],
       child: Consumer<ThemeState>(
@@ -57,10 +61,37 @@ class _PortalAppState extends State<PortalApp> {
 }
 
 class _HomeGate extends StatelessWidget {
+  const _HomeGate();
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthService>();
+    final updateService = context.watch<UpdateService>();
 
+    if (updateService.latest == null && !updateService.isChecking) {
+      Future.microtask(() => updateService.checkForUpdate());
+    }
+
+    final currentVersion = const String.fromEnvironment('APP_VERSION', defaultValue: '1.0.0');
+
+    return Column(
+      children: [
+        UpdateBanner(
+          currentVersion: currentVersion,
+          onUpdate: () {
+            if (updateService.isUpdateRequired(currentVersion)) {
+              Future.microtask(() => updateService.downloadAndInstall());
+            }
+          },
+        ),
+        Expanded(
+          child: _buildAuthGate(context, auth),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAuthGate(BuildContext context, AuthService auth) {
     if (auth.isBooting) {
       return Scaffold(
         body: Center(

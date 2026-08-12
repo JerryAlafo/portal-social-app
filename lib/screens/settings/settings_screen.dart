@@ -5,6 +5,7 @@ import '../../services/auth_service.dart';
 import '../../state/theme_state.dart';
 import '../../widgets/states.dart';
 import '../perfil/edit_profile_screen.dart';
+import 'support_creator_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -124,6 +125,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         onTap: _deleteAccount,
                       ),
                     ],
+                    const SizedBox(height: 12),
+                    const _SectionLabel('Suporte'),
+                    ListTile(
+                      leading: const Icon(Icons.person_pin_rounded),
+                      title: const Text('Suporte / Criador'),
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const SupportCreatorScreen(),
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     Center(
                       child: Text(
