@@ -1,0 +1,33 @@
+{
+  "project_info": {
+    "project_number": "798246411435",
+    "project_id": "atomic-producer-445815-d7",
+    "storage_bucket": "atomic-producer-445815-d7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:798246411435:android:0123456789abcdef",
+        "android_client_info": {
+          "package_name": "com.portal.portal_social_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "798246411435-h86eq3r409053aath0c6rejinfn8cev9.apps.googleusercontent.com",
+          "client_type": 1
+        },
+        {
+          "client_id": "798246411435-g4og78k1vsdi8vf4fdgfid5rermpgjns.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        }
+      ]
+    }
+  ],
+  "configuration_version": "1"
+}

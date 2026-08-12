@@ -1,0 +1,17 @@
+Comandos para fazeres tu mesmo
+# 1) Arrancar o emulador (AVD: portal_avd)
+& "C:\Android\Sdk\emulator\emulator.exe" -avd portal_avd
+
+# 2) Ver se está ligado
+& "C:\Android\Sdk\platform-tools\adb.exe" devices
+
+# 3) Build da app (correr na pasta do projeto)
+cd C:\Jerry\Scripts\NEW\portal-social-app
+& "C:\flutter\flutter\bin\flutter.bat" build apk --debug
+
+# 4) Instalar no emulador
+& "C:\Android\Sdk\platform-tools\adb.exe" install -r "build\app\outputs\flutter-apk\app-debug.apk"
+
+# 5) Reiniciar só a app (sem reinstalar)
+& "C:\Android\Sdk\platform-tools\adb.exe" shell am force-stop com.portal.portal_social_app
+& "C:\Android\Sdk\platform-tools\adb.exe" shell am start -n com.portal.portal_social_app/.MainActivity
