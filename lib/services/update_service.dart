@@ -40,10 +40,13 @@ class UpdateService extends ChangeNotifier {
   UpdateInfo? _latest;
   bool _isChecking = false;
   String? _error;
+  final Set<String> _dismissedVersions = {};
 
   UpdateInfo? get latest => _latest;
   bool get isChecking => _isChecking;
   String? get error => _error;
+
+  bool isDismissed(String version) => _dismissedVersions.contains(version);
 
   String get _baseUrl {
     final raw = dotenv.env['API_BASE_URL'] ?? 'https://portal-mz.vercel.app/';
@@ -66,6 +69,9 @@ class UpdateService extends ChangeNotifier {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         _latest = UpdateInfo.fromJson(data);
+        if (await wasDismissed(_latest!.version)) {
+          _dismissedVersions.add(_latest!.version);
+        }
       } else {
         throw Exception('HTTP ${response.statusCode}');
       }
@@ -101,8 +107,10 @@ class UpdateService extends ChangeNotifier {
   }
 
   Future<void> markDismissed(String version) async {
+    _dismissedVersions.add(version);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_kDismissedVersionKey, version);
+    notifyListeners();
   }
 
   Future<bool> wasDismissed(String version) async {

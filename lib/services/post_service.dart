@@ -1,6 +1,13 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
+
 import '../core/api_client.dart';
+import '../core/config.dart';
 import '../models/api_response.dart';
 import '../models/post.dart';
+import 'deep_link_service.dart';
 
 class PostService {
   static final PostService instance = PostService._();
@@ -154,5 +161,34 @@ class PostService {
     } catch (_) {
       return const ApiResult(error: 'Erro ao partilhar.');
     }
+  }
+
+  /// Gera o link de partilha, abre o share sheet nativo e regista a partilha.
+  ///
+  /// O link aponta para a versão web (`/post/{id}`); quem tiver a app instalada
+  /// abre a app nesse destino (App Links), quem não tiver abre a web.
+  static Future<void> shareWithSheet({
+    required String postId,
+    required String content,
+  }) async {
+    final url = '${AppConfig.baseUrl}/post/$postId';
+    try {
+      final text = content.trim().isEmpty
+          ? 'Olha este post no Portal!'
+          : content.trim();
+      await SharePlus.instance.share(ShareParams(
+        title: 'Portal Social',
+        text: '$text\n$url',
+      ));
+    } catch (e) {
+      final ctx = DeepLinkService.instance.navigatorKey.currentContext;
+      if (ctx != null && ctx.mounted) {
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(content: Text('Falha na partilha: $e')),
+        );
+      }
+    }
+    // Regista a contagem de partilhas (fire-and-forget, não bloqueia a UI).
+    unawaited(PostService.instance.sharePost(postId));
   }
 }

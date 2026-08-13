@@ -6,6 +6,7 @@ import 'core/theme.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/main_shell.dart';
 import 'services/auth_service.dart';
+import 'services/deep_link_service.dart';
 import 'services/update_service.dart';
 import 'state/theme_state.dart';
 import 'widgets/brand_logo.dart';
@@ -14,6 +15,7 @@ import 'widgets/update_banner.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
+  await DeepLinkService.instance.init();
   runApp(const PortalApp());
 }
 
@@ -32,6 +34,7 @@ class _PortalAppState extends State<PortalApp> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      DeepLinkService.instance.notifyReady();
       if (mounted) _auth.restoreSession();
     });
   }
@@ -48,6 +51,7 @@ class _PortalAppState extends State<PortalApp> {
         builder: (context, themeState, _) {
           return MaterialApp(
             title: 'Portal Social',
+            navigatorKey: DeepLinkService.instance.navigatorKey,
             debugShowCheckedModeBanner: false,
             themeMode: themeState.themeMode,
             theme: buildAppTheme(Brightness.light),

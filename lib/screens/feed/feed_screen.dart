@@ -362,7 +362,10 @@ class _FeedScreenState extends State<FeedScreen>
           onLike: () => _toggleLike(post),
           onComment: () => _openPost(post),
           onRepost: () => _openPost(post),
-          onShare: () => _openPost(post),
+          onShare: () => PostService.shareWithSheet(
+            postId: post.id,
+            content: post.content,
+          ),
           onMore: () => _showPostMenu(post),
         );
       },

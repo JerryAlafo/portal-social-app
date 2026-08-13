@@ -117,14 +117,18 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+  static bool _googleInitialized = false;
+
   Future<ApiResult<Profile?>> loginWithGoogle() async {
     try {
       final gs = GoogleSignIn.instance;
-      final account = await gs.signIn();
-      if (account == null) {
-        return const ApiResult(error: 'Login com Google cancelado.');
+      if (!_googleInitialized) {
+        await gs.initialize(serverClientId: _googleClientId);
+        _googleInitialized = true;
       }
-      final auth = await account.authentication;
+      final account =
+          await gs.authenticate(scopeHint: const ['email', 'profile']);
+      final auth = account.authentication;
       final idToken = auth.idToken;
       if (idToken == null) {
         return const ApiResult(error: 'Falha a obter token do Google.');

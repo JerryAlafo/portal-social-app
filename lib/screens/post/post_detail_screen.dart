@@ -141,11 +141,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   Future<void> _share() async {
     final post = _post;
     if (post == null) return;
-    final res = await PostService.instance.sharePost(post.id);
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(res.error ?? 'Link copiado!')),
-    );
+    await PostService.shareWithSheet(postId: post.id, content: post.content);
   }
 
   @override

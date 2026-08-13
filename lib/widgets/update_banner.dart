@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../core/theme.dart';
 import '../services/update_service.dart';
 
 class UpdateBanner extends StatelessWidget {
@@ -29,11 +30,12 @@ class UpdateBanner extends StatelessWidget {
           final required = updateService.isUpdateRequired(currentVersion);
           final available = updateService.isUpdateAvailable(currentVersion);
 
-          if (!required && !available) {
+          if ((!required && updateService.isDismissed(info.version)) ||
+              (!required && !available)) {
             return const SizedBox.shrink();
           }
 
-          final color = required ? Colors.red : Colors.purple;
+          final color = required ? AppColors.danger : AppColors.accent;
           final icon = required ? Icons.lock : Icons.system_update_rounded;
           final title = required ? 'Atualização obrigatória' : 'Atualização disponível';
           final message = required
