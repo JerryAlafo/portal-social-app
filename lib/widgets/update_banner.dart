@@ -27,20 +27,22 @@ class UpdateBanner extends StatelessWidget {
             return const SizedBox.shrink();
           }
 
-          final required = updateService.isUpdateRequired(currentVersion);
-          final available = updateService.isUpdateAvailable(currentVersion);
-
-          if ((!required && updateService.isDismissed(info.version)) ||
-              (!required && !available)) {
+          // A atualização obrigatória é apresentada no ForcedUpdateScreen,
+          // que bloqueia a app — aqui fica só a atualização opcional.
+          if (updateService.isUpdateRequired(currentVersion)) {
+            return const SizedBox.shrink();
+          }
+          if (!updateService.isUpdateAvailable(currentVersion)) {
+            return const SizedBox.shrink();
+          }
+          if (updateService.isDismissed(info.version)) {
             return const SizedBox.shrink();
           }
 
-          final color = required ? AppColors.danger : AppColors.accent;
-          final icon = required ? Icons.lock : Icons.system_update_rounded;
-          final title = required ? 'Atualização obrigatória' : 'Atualização disponível';
-          final message = required
-              ? 'Esta versão não é mais suportada.\nAtualize para continuar a usar o app.'
-              : 'Há uma nova versão disponível (${info.version}).';
+          final color = AppColors.accent;
+          final icon = Icons.system_update_rounded;
+          const title = 'Atualização disponível';
+          final message = 'Há uma nova versão disponível (${info.version}).';
 
           return Container(
             width: double.infinity,
@@ -85,7 +87,7 @@ class UpdateBanner extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (!required && onDismiss != null)
+                    if (onDismiss != null)
                       Material(
                         color: Colors.white.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(20),
@@ -139,7 +141,7 @@ class UpdateBanner extends StatelessWidget {
                       onUpdate?.call();
                     },
                     icon: const Icon(Icons.download_rounded, size: 18),
-                    label: Text(required ? 'Atualizar agora' : 'Baixar atualização'),
+                    label: const Text('Baixar atualização'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: color,

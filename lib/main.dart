@@ -11,6 +11,7 @@ import 'services/deep_link_service.dart';
 import 'services/update_service.dart';
 import 'state/theme_state.dart';
 import 'widgets/brand_logo.dart';
+import 'widgets/forced_update_screen.dart';
 import 'widgets/update_banner.dart';
 
 Future<void> main() async {
@@ -79,16 +80,13 @@ class _HomeGate extends StatelessWidget {
 
     final currentVersion = const String.fromEnvironment('APP_VERSION', defaultValue: '1.0.0');
 
+    if (updateService.isUpdateRequired(currentVersion)) {
+      return const ForcedUpdateScreen();
+    }
+
     return Column(
       children: [
-        UpdateBanner(
-          currentVersion: currentVersion,
-          onUpdate: () {
-            if (updateService.isUpdateRequired(currentVersion)) {
-              Future.microtask(() => updateService.downloadAndInstall());
-            }
-          },
-        ),
+        UpdateBanner(currentVersion: currentVersion),
         Expanded(
           child: _buildAuthGate(context, auth),
         ),
