@@ -126,6 +126,12 @@ class AuthService extends ChangeNotifier {
         await gs.initialize(serverClientId: _googleClientId);
         _googleInitialized = true;
       }
+      // google_sign_in 7.x falha o re-auth ([16] Account reauth failed) quando
+      // o Credential Manager já conhece a conta. Limpar o estado antes de cada
+      // tentativa força o fluxo "fresh" (o que funciona de forma fiável).
+      try {
+        await gs.signOut();
+      } catch (_) {}
       final account =
           await gs.authenticate(scopeHint: const ['email', 'profile']);
       final idToken = account.authentication.idToken;
@@ -133,25 +139,6 @@ class AuthService extends ChangeNotifier {
         return const ApiResult(error: 'Falha a obter token do Google.');
       }
       return _completeGoogleAuth(idToken);
-    } on GoogleSignInException catch (e) {
-      // Erro conhecido do google_sign_in 7.x: após o 1º login, o Credential
-      // Manager mantém a relação da conta e o authenticate() seguinte falha
-      // com "[16] Account reauth failed" (code canceled). Limpa e tenta uma vez.
-      final isReauthFailure = (e.description ?? '')
-          .toLowerCase()
-          .contains('reauth');
-      if (isReauthFailure) {
-        try {
-          await gs.signOut();
-          final account =
-              await gs.authenticate(scopeHint: const ['email', 'profile']);
-          final idToken = account.authentication.idToken;
-          if (idToken != null) {
-            return _completeGoogleAuth(idToken);
-          }
-        } catch (_) {}
-      }
-      return ApiResult(error: 'Erro no login com Google: $e');
     } catch (e) {
       return ApiResult(error: 'Erro no login com Google: $e');
     }
