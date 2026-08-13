@@ -37,7 +37,7 @@ dependencies:
   http: ^1.6.0
   shared_preferences: ^2.5.5
   provider: ^6.1.5+1
-  google_sign_in: ^7.2.0
+  google_sign_in: ^6.2.1
   intl: ^0.20.3
   cached_network_image: ^3.4.1
   image_picker: ^1.2.3

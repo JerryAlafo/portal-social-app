@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,7 +21,6 @@ class AuthService extends ChangeNotifier {
   AuthStatus _status = AuthStatus.unknown;
   Profile? _profile;
   bool _booting = true;
-  String? get _googleClientId => AppConfig.googleClientId;
 
   AuthStatus get status => _status;
   Profile? get profile => _profile;
@@ -117,28 +117,30 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  static bool _googleInitialized = false;
+  static GoogleSignIn? _googleSignIn;
+
+  static GoogleSignIn get _gs => _googleSignIn ??=
+      GoogleSignIn(scopes: const ['email', 'profile'], serverClientId: _clientId);
+
+  static String? get _clientId => AppConfig.googleClientId;
 
   Future<ApiResult<Profile?>> loginWithGoogle() async {
-    final gs = GoogleSignIn.instance;
     try {
-      if (!_googleInitialized) {
-        await gs.initialize(serverClientId: _googleClientId);
-        _googleInitialized = true;
+      final account = await _gs.signIn();
+      if (account == null) {
+        return const ApiResult(error: 'Login com Google cancelado.');
       }
-      // google_sign_in 7.x falha o re-auth ([16] Account reauth failed) quando
-      // o Credential Manager já conhece a conta. Limpar o estado antes de cada
-      // tentativa força o fluxo "fresh" (o que funciona de forma fiável).
-      try {
-        await gs.signOut();
-      } catch (_) {}
-      final account =
-          await gs.authenticate(scopeHint: const ['email', 'profile']);
-      final idToken = account.authentication.idToken;
+      final auth = await account.authentication;
+      final idToken = auth.idToken;
       if (idToken == null) {
         return const ApiResult(error: 'Falha a obter token do Google.');
       }
       return _completeGoogleAuth(idToken);
+    } on PlatformException catch (e) {
+      if (e.code == 'sign_in_canceled') {
+        return const ApiResult(error: 'Login com Google cancelado.');
+      }
+      return ApiResult(error: 'Erro no login com Google: ${e.message ?? e.code}');
     } catch (e) {
       return ApiResult(error: 'Erro no login com Google: $e');
     }
@@ -256,7 +258,7 @@ class AuthService extends ChangeNotifier {
     _profile = null;
     notifyListeners();
     try {
-      await GoogleSignIn.instance.signOut();
+      await _gs.signOut();
     } catch (_) {}
   }
 
