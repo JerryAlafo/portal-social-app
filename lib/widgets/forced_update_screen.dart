@@ -114,7 +114,20 @@ class ForcedUpdateScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 20),
                         FilledButton.icon(
-                          onPressed: () => updateService.downloadAndInstall(),
+                          onPressed: () async {
+                            try {
+                              await updateService.downloadAndInstall();
+                            } catch (e) {
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Não foi possível abrir o download: $e',
+                                  ),
+                                ),
+                              );
+                            }
+                          },
                           style: FilledButton.styleFrom(
                             backgroundColor: AppColors.accent,
                             foregroundColor: Colors.white,
