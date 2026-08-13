@@ -120,54 +120,75 @@ class AuthService extends ChangeNotifier {
   static bool _googleInitialized = false;
 
   Future<ApiResult<Profile?>> loginWithGoogle() async {
+    final gs = GoogleSignIn.instance;
     try {
-      final gs = GoogleSignIn.instance;
       if (!_googleInitialized) {
         await gs.initialize(serverClientId: _googleClientId);
         _googleInitialized = true;
       }
       final account =
           await gs.authenticate(scopeHint: const ['email', 'profile']);
-      final auth = account.authentication;
-      final idToken = auth.idToken;
+      final idToken = account.authentication.idToken;
       if (idToken == null) {
         return const ApiResult(error: 'Falha a obter token do Google.');
       }
-
-      final csrf = await ApiClient.instance.fetchCsrfToken();
-      final res = await ApiClient.instance.post(
-        '/api/auth/callback/google',
-        form: {
-          'csrfToken': csrf,
-          'id_token': idToken,
-          'callbackUrl': 'https://portal-mz.vercel.app/feed',
-          'json': 'true',
-        },
-      );
-
-      if (res.statusCode != 200 && res.statusCode != 302) {
-        return ApiResult(
-          error: 'Não foi possível entrar com Google (${res.statusCode}).',
-          statusCode: res.statusCode,
-        );
+      return _completeGoogleAuth(idToken);
+    } on GoogleSignInException catch (e) {
+      // Erro conhecido do google_sign_in 7.x: após o 1º login, o Credential
+      // Manager mantém a relação da conta e o authenticate() seguinte falha
+      // com "[16] Account reauth failed" (code canceled). Limpa e tenta uma vez.
+      final isReauthFailure = (e.description ?? '')
+          .toLowerCase()
+          .contains('reauth');
+      if (isReauthFailure) {
+        try {
+          await gs.signOut();
+          final account =
+              await gs.authenticate(scopeHint: const ['email', 'profile']);
+          final idToken = account.authentication.idToken;
+          if (idToken != null) {
+            return _completeGoogleAuth(idToken);
+          }
+        } catch (_) {}
       }
-
-      final session = await _fetchSession();
-      if (session.data == null) {
-        return ApiResult(
-          error: _googleRedirectError(res),
-          statusCode: res.statusCode,
-        );
-      }
-
-      await _persistSession();
-      _status = AuthStatus.authenticated;
-      _profile = _profileFromSession(session.data!);
-      notifyListeners();
-      return const ApiResult(data: null);
+      return ApiResult(error: 'Erro no login com Google: $e');
     } catch (e) {
       return ApiResult(error: 'Erro no login com Google: $e');
     }
+  }
+
+  Future<ApiResult<Profile?>> _completeGoogleAuth(String idToken) async {
+    final csrf = await ApiClient.instance.fetchCsrfToken();
+    final res = await ApiClient.instance.post(
+      '/api/auth/callback/google',
+      form: {
+        'csrfToken': csrf,
+        'id_token': idToken,
+        'callbackUrl': 'https://portal-mz.vercel.app/feed',
+        'json': 'true',
+      },
+    );
+
+    if (res.statusCode != 200 && res.statusCode != 302) {
+      return ApiResult(
+        error: 'Não foi possível entrar com Google (${res.statusCode}).',
+        statusCode: res.statusCode,
+      );
+    }
+
+    final session = await _fetchSession();
+    if (session.data == null) {
+      return ApiResult(
+        error: _googleRedirectError(res),
+        statusCode: res.statusCode,
+      );
+    }
+
+    await _persistSession();
+    _status = AuthStatus.authenticated;
+    _profile = _profileFromSession(session.data!);
+    notifyListeners();
+    return const ApiResult(data: null);
   }
 
   Future<ApiResult<bool>> register({
@@ -247,6 +268,9 @@ class AuthService extends ChangeNotifier {
     _status = AuthStatus.unknown;
     _profile = null;
     notifyListeners();
+    try {
+      await GoogleSignIn.instance.signOut();
+    } catch (_) {}
   }
 
   /// Elimina a conta do utilizador (DELETE /api/account).
