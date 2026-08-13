@@ -149,7 +149,7 @@ class AuthService extends ChangeNotifier {
   Future<ApiResult<Profile?>> _completeGoogleAuth(String idToken) async {
     final csrf = await ApiClient.instance.fetchCsrfToken();
     final res = await ApiClient.instance.post(
-      '/api/auth/callback/google',
+      '/api/auth/callback/google-mobile',
       form: {
         'csrfToken': csrf,
         'id_token': idToken,
@@ -160,7 +160,7 @@ class AuthService extends ChangeNotifier {
 
     if (res.statusCode != 200 && res.statusCode != 302) {
       return ApiResult(
-        error: 'Não foi possível entrar com Google (${res.statusCode}).',
+        error: _googleMobileError(res.statusCode),
         statusCode: res.statusCode,
       );
     }
@@ -168,7 +168,7 @@ class AuthService extends ChangeNotifier {
     final session = await _fetchSession();
     if (session.data == null) {
       return ApiResult(
-        error: _googleRedirectError(res),
+        error: _googleMobileRedirectError(res),
         statusCode: res.statusCode,
       );
     }
@@ -345,13 +345,21 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  String _googleRedirectError(http.Response res) {
+  String _googleMobileError(int status) {
+    switch (status) {
+      case 401:
+        return 'Não foi possível confirmar a sessão do Google.';
+      default:
+        return 'Erro ao entrar com Google.';
+    }
+  }
+
+  /// Mapeia o erro do redirect do NextAuth (Location: ...?error=...).
+  String _googleMobileRedirectError(http.Response res) {
     final uri = Uri.tryParse(res.headers['location'] ?? '');
     switch (uri?.queryParameters['error']) {
-      case 'OAuthSignin':
-      case 'OAuthCallback':
-      case 'AccessDenied':
-        return 'Acesso negado pelo Google.';
+      case 'CredentialsSignin':
+        return 'Não foi possível confirmar a sessão do Google.';
       case 'MissingCSRF':
         return 'Erro de segurança. Tenta novamente.';
       default:
