@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'core/theme.dart';
 import 'screens/auth/login_screen.dart';
+import 'screens/auth/onboarding_screen.dart';
 import 'screens/main_shell.dart';
 import 'services/auth_service.dart';
 import 'services/deep_link_service.dart';
@@ -122,6 +123,12 @@ class _HomeGate extends StatelessWidget {
 
     if (auth.status == AuthStatus.unknown) {
       return const LoginScreen();
+    }
+
+    final profile = auth.profile;
+    if (auth.isAuthenticated &&
+        (profile == null || profile.username.trim().isEmpty)) {
+      return const OnboardingScreen();
     }
 
     return const MainShell();

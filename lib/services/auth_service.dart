@@ -236,6 +236,12 @@ class AuthService extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Atualiza o perfil local (ex.: após completar o onboarding).
+  void applyProfile(Profile profile) {
+    _profile = profile;
+    notifyListeners();
+  }
+
   Future<void> logout() async {
     await _clearSession();
     _status = AuthStatus.unknown;
